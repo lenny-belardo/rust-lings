@@ -23,8 +23,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
 // You need to create an implementation for a tuple of three integers,
@@ -66,12 +64,22 @@ impl TryFrom<[i16; 3]> for Color {
     }
 }
 
-// // Slice implementation
-// impl TryFrom<&[i16]> for Color {
-//     type Error = IntoColorError;
-//     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
-//     }
-// }
+// Slice implementation
+impl TryFrom<&[i16]> for Color {
+    type Error = IntoColorError;
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        match slice {
+            _ if slice.len() != 3  => Err(IntoColorError::BadLen),
+            [red, green, blue] if *red < 0 || *green < 0 || *blue < 0 => Err(IntoColorError::IntConversion),
+            [red, green, blue] if *red > 255 || *green > 255 || *blue > 255 => Err(IntoColorError::IntConversion),
+            _ => Ok(Color {
+                red: slice[0] as u8,
+                green: slice[1] as u8,
+                blue: slice[2] as u8
+            })
+        }
+    }
+}
 
 fn main() {
     // Use the `try_from` function
@@ -82,13 +90,13 @@ fn main() {
     let c2: Result<Color, _> = [183, 65, 14].try_into();
     println!("{:?}", c2);
 
-    // let v = vec![183, 65, 14];
-    // // With slice we should use `try_from` function
-    // let c3 = Color::try_from(&v[..]);
-    // println!("{:?}", c3);
-    // // or take slice within round brackets and use TryInto
-    // let c4: Result<Color, _> = (&v[..]).try_into();
-    // println!("{:?}", c4);
+    let v = vec![183, 65, 14];
+    // With slice we should use `try_from` function
+    let c3 = Color::try_from(&v[..]);
+    println!("{:?}", c3);
+    // or take slice within round brackets and use TryInto
+    let c4: Result<Color, _> = (&v[..]).try_into();
+    println!("{:?}", c4);
 }
 
 #[cfg(test)]
@@ -157,52 +165,52 @@ mod tests {
             }
         );
     }
-    // #[test]
-    // fn test_slice_out_of_range_positive() {
-    //     let arr = [10000, 256, 1000];
-    //     assert_eq!(
-    //         Color::try_from(&arr[..]),
-    //         Err(IntoColorError::IntConversion)
-    //     );
-    // }
-    // #[test]
-    // fn test_slice_out_of_range_negative() {
-    //     let arr = [-256, -1, -10];
-    //     assert_eq!(
-    //         Color::try_from(&arr[..]),
-    //         Err(IntoColorError::IntConversion)
-    //     );
-    // }
-    // #[test]
-    // fn test_slice_sum() {
-    //     let arr = [-1, 255, 255];
-    //     assert_eq!(
-    //         Color::try_from(&arr[..]),
-    //         Err(IntoColorError::IntConversion)
-    //     );
-    // }
-    // #[test]
-    // fn test_slice_correct() {
-    //     let v = vec![183, 65, 14];
-    //     let c: Result<Color, _> = Color::try_from(&v[..]);
-    //     assert!(c.is_ok());
-    //     assert_eq!(
-    //         c.unwrap(),
-    //         Color {
-    //             red: 183,
-    //             green: 65,
-    //             blue: 14
-    //         }
-    //     );
-    // }
-    // #[test]
-    // fn test_slice_excess_length() {
-    //     let v = vec![0, 0, 0, 0];
-    //     assert_eq!(Color::try_from(&v[..]), Err(IntoColorError::BadLen));
-    // }
-    // #[test]
-    // fn test_slice_insufficient_length() {
-    //     let v = vec![0, 0];
-    //     assert_eq!(Color::try_from(&v[..]), Err(IntoColorError::BadLen));
-    // }
+    #[test]
+    fn test_slice_out_of_range_positive() {
+        let arr = [10000, 256, 1000];
+        assert_eq!(
+            Color::try_from(&arr[..]),
+            Err(IntoColorError::IntConversion)
+        );
+    }
+    #[test]
+    fn test_slice_out_of_range_negative() {
+        let arr = [-256, -1, -10];
+        assert_eq!(
+            Color::try_from(&arr[..]),
+            Err(IntoColorError::IntConversion)
+        );
+    }
+    #[test]
+    fn test_slice_sum() {
+        let arr = [-1, 255, 255];
+        assert_eq!(
+            Color::try_from(&arr[..]),
+            Err(IntoColorError::IntConversion)
+        );
+    }
+    #[test]
+    fn test_slice_correct() {
+        let v = vec![183, 65, 14];
+        let c: Result<Color, _> = Color::try_from(&v[..]);
+        assert!(c.is_ok());
+        assert_eq!(
+            c.unwrap(),
+            Color {
+                red: 183,
+                green: 65,
+                blue: 14
+            }
+        );
+    }
+    #[test]
+    fn test_slice_excess_length() {
+        let v = vec![0, 0, 0, 0];
+        assert_eq!(Color::try_from(&v[..]), Err(IntoColorError::BadLen));
+    }
+    #[test]
+    fn test_slice_insufficient_length() {
+        let v = vec![0, 0];
+        assert_eq!(Color::try_from(&v[..]), Err(IntoColorError::BadLen));
+    }
 }
